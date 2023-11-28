@@ -87,10 +87,10 @@ namespace OctopusController
         {
             for(int i =0; i < _legs.Length; i+=2)
             {
-                legFutureBases[i];
-                legTargets[i];
+                //legFutureBases[i];
+                //legTargets[i];
 
-                _legs[i].Bones[0];
+                //_legs[i].Bones[0];
 
             }
 
