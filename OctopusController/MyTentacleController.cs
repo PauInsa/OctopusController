@@ -51,44 +51,13 @@ namespace OctopusController
                     break;
                 case TentacleMode.TAIL:
                     //TODO: in _endEffectorsphere you keep a reference to the red sphere
-                    
-                    Transform node1 = root;
-                    Bones[0] = root; // Joint 0
-
-                    for (int i = 1; i < 5; i++) // Joint 1 -- Joint 4
-                    {
-                        node1 = node1.GetChild(1);
-                        Bones[i] = node1;
-                    }
-
-                    _endEffectorSphere = node1.GetChild(1);
 
 
 
                     break;
                 case TentacleMode.TENTACLE:
                     //TODO: in _endEffectorphere you  keep a reference to the sphere with a collider attached to the endEffector
-                    
-                    // 49 Iteracions per arribar a Bone.001
-                    // 50 Iteracions per arribar a Bone.001_end
-                    // 51 Iteracions per arribar a BallRegion
 
-                    Transform node2 = root; //Tentacle_name
-
-                    node2 = node2.GetChild(0); // Armature
-                    Bones[0] = node2;
-
-                    node2 = node2.GetChild(0); // Bone
-                    Bones[1] = node2; 
-                    
-                    for (int i = 2; i < 52; i++) // Bone.050 -- Bone.001_end
-                    {
-                        node2 = node2.GetChild(0);
-                        Bones[i] = node2;
-                    }
-
-                    node2 = node2.GetChild(0);
-                    _endEffectorSphere = node2; // BallRegion 
 
                     break;
             }
