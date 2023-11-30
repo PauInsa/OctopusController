@@ -19,9 +19,11 @@ namespace OctopusController
         //LEGS
         Transform[] legTargets;
         Transform[] legFutureBases;
+
         MyTentacleController[] _legs = new MyTentacleController[6];
 
-        
+        Vector3[,] temPos;
+
         #region public
         public void InitLegs(Transform[] LegRoots,Transform[] LegFutureBases, Transform[] LegTargets)
         {
@@ -35,9 +37,9 @@ namespace OctopusController
 
                 legTargets = LegTargets;
                 legFutureBases = LegFutureBases;
-
-                
             }
+
+            temPos = new Vector3[_legs.Length, _legs[0].Bones.Length];
 
         }
 
@@ -64,7 +66,7 @@ namespace OctopusController
 
         public void UpdateIK()
         {
- 
+            updateLegs();
         }
         #endregion
 
@@ -85,19 +87,87 @@ namespace OctopusController
         //TODO: implement fabrik method to move legs 
         private void updateLegs()
         {
-            for(int i =0; i < _legs.Length; i+=2)
+            
+            for(int i = 0; i < _legs.Length; i++)
             {
-                //legFutureBases[i];
-                //legTargets[i];
+                //if (_legs[i].LegDistances[2] < _legs[i].LegTotalDistance)
+                //{
+                    //Debug.Log("ENTERING BACKWARDS");
+                    
+                    backwardsIteration(i);
+                    //Debug.Log("ENTERING FORWARDS");
 
-                //_legs[i].Bones[0];
+                    forwardIteration(i);
+                //}
+               // else
+                //{
+                   // Debug.Log(i+ "_LEG NOT IN REACH");
+               // }
+                   
 
             }
 
-            for (int i = 1; i < _legs.Length; i += 2)
+
+            for (int i = 0; i < _legs.Length; i++)
             {
 
+                _legs[i].Bones[0] = legFutureBases[i];
+
+                for (int j = 1; j < _legs[0].Bones.Length-1; j++)
+                {
+
+                    _legs[i].Bones[j].position = temPos[i, j];
+
+                    Debug.DrawRay(_legs[i].Bones[j].position, (_legs[i].Bones[j].position - _legs[i].Bones[j+1].position));
+
+                }
+                _legs[i].Bones[3] = legTargets[i];
             }
+
+            
+
+
+        }
+
+        private void forwardIteration(int i)
+        {
+
+            for (int j = 1; j < _legs[i].Bones.Length-1; j++)
+            {
+                //Debug.Log(j);
+
+                Vector3 p = _legs[i].Bones[j+1].position - _legs[i].Bones[j].position;
+
+                Vector3 v = _legs[i].LegDistances[j] * p.normalized;
+
+                Vector3 newPos = _legs[i].Bones[j].position + v ;
+
+                temPos[i, j] = newPos;
+            }
+
+
+        }
+
+        // Bones.length = 4, [3] -> EndEffector
+
+        private void backwardsIteration(int i)
+        {
+
+            for (int j = _legs[i].Bones.Length-1; j > 1; j--)
+            {
+                //Debug.Log(j);
+
+                Vector3 p = _legs[i].Bones[j - 1].position - _legs[i].Bones[j].position;
+
+                //Debug.Log("j: " + j + " j-1: " + (j - 1));
+
+                Vector3 v = _legs[i].LegDistances[j - 1] * p.normalized;
+
+                Vector3 newPos = _legs[i].Bones[j].position + v;
+
+                temPos[i, j] = newPos;
+            }
+
 
         }
         #endregion
