@@ -28,6 +28,11 @@ namespace OctopusController
 
         List<Transform> tempList;
 
+        public Transform getEndEffector()
+        {
+            return _endEffectorSphere;
+        }
+
         //Exercise 1.
         public Transform[] LoadTentacleJoints(Transform root, TentacleMode mode)
         {
