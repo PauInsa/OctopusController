@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 
 namespace OctopusController
@@ -18,8 +19,10 @@ namespace OctopusController
         MyTentacleController _tail;
         float animationRange;
         bool startedMovement = false;
-        Transform[] virtualTail;
-        Transform virtualEndEffector;
+        Vector3[] virtualTailPos;
+        Quaternion[] virtualTailRot;
+        Vector3 virtualEndEffectorPos;
+        Quaternion virtualEndEffectorRot;
 
         //LEGS
         Transform[] legTargets;
@@ -56,14 +59,21 @@ namespace OctopusController
             
             tailEndEffector = _tail.getEndEffector();
 
-            for(int i = 0; i<_tail.Bones.Length; i++)
+
+            virtualTailPos = new Vector3[_tail.Bones.Length];
+            virtualTailRot = new Quaternion[_tail.Bones.Length];
+
+            virtualEndEffectorPos = new Vector3();
+            virtualEndEffectorRot = new Quaternion();
+
+            for (int i = 0; i < _tail.Bones.Length; i++)
             {
-                virtualTail[i].position = _tail.Bones[i].position;
-                virtualTail[i].rotation = _tail.Bones[i].rotation;
+                virtualTailPos[i] = _tail.Bones[i].position;
+                virtualTailRot[i] = _tail.Bones[i].rotation;
             }
 
-            virtualEndEffector.position = tailEndEffector.position;
-            virtualEndEffector.rotation = tailEndEffector.rotation;
+            virtualEndEffectorPos = tailEndEffector.position;
+            virtualEndEffectorRot = tailEndEffector.rotation;
             
         }
 
@@ -84,19 +94,19 @@ namespace OctopusController
 
         public void UpdateIK()
         {
+
+
             updateTail();
-
-
 
 
             for (int i = 0; i < _tail.Bones.Length; i++)
             {
-                _tail.Bones[i].position = virtualTail[i].position;
-                _tail.Bones[i].rotation = virtualTail[i].rotation;
+                _tail.Bones[i].position = virtualTailPos[i];
+                _tail.Bones[i].rotation = virtualTailRot[i];
             }
 
-            tailEndEffector.position = virtualEndEffector.position;
-            tailEndEffector.rotation = virtualEndEffector.rotation;            
+            tailEndEffector.position = virtualEndEffectorPos;         
+            tailEndEffector.rotation = virtualEndEffectorRot;         
  
         }
         #endregion
@@ -115,67 +125,87 @@ namespace OctopusController
         {
             if(startedMovement)
             {
-                float minDist = checkFuturePos(0);
-                int index = 0;
+                Vector3[] temporalTailPos = new Vector3[_tail.Bones.Length];
+                Quaternion[] temporalTailRot = new Quaternion[_tail.Bones.Length];
 
-                for (int i = 1; i < _tail.Bones.Length; i++)
+                Vector3 temporalEndEffectorPos = new Vector3();
+                Quaternion temporalEndEffectorRot = new Quaternion();
+
+
+                for (int i = 0; i < _tail.Bones.Length; i++)
                 {
-                    virtualEndEffector = tailEndEffector;
-                    virtualTail = _tail.Bones;
-
-                    float newDist = checkFuturePos(i);
-
-                    if (minDist >= newDist)
+                    for (int j = 0; j < _tail.Bones.Length; j++)
                     {
-                        minDist = newDist;
-                        index = i;
+                        temporalTailPos[j] = virtualTailPos[j];
+                        temporalTailRot[j] = virtualTailRot[j];
                     }
 
+                    temporalEndEffectorPos = virtualEndEffectorPos;
+                    temporalEndEffectorRot = virtualEndEffectorRot;
+
+
+                    float leftDist = checkFuturePos(i, 1);
+
+                    for (int j = 0; j < _tail.Bones.Length; j++)
+                    {
+                        virtualTailPos[j] = temporalTailPos[j];
+                        virtualTailRot[j] = temporalTailRot[j];
+                    }
+
+                    virtualEndEffectorPos = temporalEndEffectorPos;
+                    virtualEndEffectorRot = temporalEndEffectorRot;
+
+                    float rightDist = checkFuturePos(i, -1);
+
+                    if (leftDist < rightDist)
+                    {
+                        for (int j = 0; j < _tail.Bones.Length; j++)
+                        {
+                            virtualTailPos[j] = temporalTailPos[j];
+                            virtualTailRot[j] = temporalTailRot[j];
+                        }
+
+                        virtualEndEffectorPos = temporalEndEffectorPos;
+                        virtualEndEffectorRot = temporalEndEffectorRot;
+
+                        checkFuturePos(i, 1);
+                    }
                 }
-
-                virtualEndEffector = tailEndEffector;
-                virtualTail = _tail.Bones;
-
-                checkFuturePos(index);
-
             }
-
         }
 
-        private float checkFuturePos(int i)
+        private float checkFuturePos(int i, int r)
         {
 
-            _tail.Bones[i].rotation += animationRange;
+            Vector3 vectorToTarget = virtualTailPos[i] - _tail.Bones[i].position;
 
-            Vector3 vectorToEffector = tailEndEffector.position - _tail.Bones[i].position;
-            Vector3 vectorToTarget = tailTarget.position - _tail.Bones[i].position;
+            float angle = Vector3.Angle(vectorToTarget, virtualTailRot[i].eulerAngles);
 
-            Vector3 rotationAxis = Vector3.Cross(vectorToEffector, vectorToTarget).normalized;
+            Vector3 rotationAxis = Vector3.Cross(vectorToTarget, virtualTailRot[i].eulerAngles);
 
-            float angle = Vector3.Angle(vectorToEffector, vectorToTarget);
+            float finalAngle = angle / (virtualEndEffectorPos - tailTarget.position).magnitude;
 
-            _tail.Bones[i].Rotate(rotationAxis, angle, Space.World);
+            _tail.Bones[i].Rotate(rotationAxis, finalAngle * r, Space.World);
 
             simulateKinematics();
 
-            float newDist = (tailEndEffector.position - tailTarget.position).magnitude;
+            float newDist = (virtualEndEffectorPos - tailTarget.position).magnitude;
 
             return newDist;
         }
 
         private void simulateKinematics()
         {
+            Quaternion rotations = virtualTailRot[0];
 
-            Quaternion rotations = virtualTail[0].rotation;
-
-            for (int i = 1; i < virtualTail.Length; i++)
+            for (int i = 1; i < virtualTailPos.Length; i++)
             {
-                virtualTail[i].position = virtualTail[i-1].position + rotations * virtualTail[i].position;
+                virtualTailPos[i] = virtualTailPos[i-1] + rotations * virtualTailPos[i];
 
-                rotations *= virtualTail[i].rotation;
+                rotations *= virtualTailRot[i];
             }
 
-            virtualEndEffector.position = virtualTail[virtualTail.Length].position + rotations * virtualEndEffector.position;
+            virtualEndEffectorPos = virtualTailPos[virtualTailPos.Length-1] + rotations * virtualEndEffectorPos;
 
         }
 
