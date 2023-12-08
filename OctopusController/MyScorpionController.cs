@@ -1,10 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
 using static Unity.IO.LowLevel.Unsafe.AsyncReadManagerMetrics;
 using static UnityEngine.GraphicsBuffer;
+using UnityEngine.UIElements;
 
 
 namespace OctopusController
@@ -17,6 +20,11 @@ namespace OctopusController
         Transform tailEndEffector;
         MyTentacleController _tail;
         float animationRange;
+        bool startedMovement = false;
+        Vector3[] virtualTailPos;
+        Quaternion[] virtualTailRot;
+        Vector3 virtualEndEffectorPos;
+        Quaternion virtualEndEffectorRot;
 
         //LEGS
         Transform[] legTargets;
@@ -50,12 +58,33 @@ namespace OctopusController
         {
             _tail = new MyTentacleController();
             _tail.LoadTentacleJoints(TailBase, TentacleMode.TAIL);
+
             //TODO: Initialize anything needed for the Gradient Descent implementation
+            
+            tailEndEffector = _tail.getEndEffector();
+
+
+            virtualTailPos = new Vector3[_tail.Bones.Length];
+            virtualTailRot = new Quaternion[_tail.Bones.Length];
+
+            virtualEndEffectorPos = new Vector3();
+            virtualEndEffectorRot = new Quaternion();
+
+            for (int i = 0; i < _tail.Bones.Length; i++)
+            {
+                virtualTailPos[i] = _tail.Bones[i].position;
+                virtualTailRot[i] = _tail.Bones[i].rotation;
+            }
+
+            virtualEndEffectorPos = tailEndEffector.position;
+            virtualEndEffectorRot = tailEndEffector.rotation;
+            
         }
 
         //TODO: Check when to start the animation towards target and implement Gradient Descent method to move the joints.
         public void NotifyTailTarget(Transform target)
         {
+            tailTarget = target;
 
         }
 
@@ -63,6 +92,7 @@ namespace OctopusController
         public void NotifyStartWalk()
         {
             startWalking = true;
+            startedMovement = true;
         }
 
         //TODO: create the apropiate animations and update the IK from the legs and tail
@@ -71,6 +101,17 @@ namespace OctopusController
         {
             updateLegPos();
             updateLegs();
+
+            
+            updateTail();
+
+
+            for (int i = 0; i < _tail.Bones.Length; i++)
+            {
+                _tail.Bones[i].rotation = virtualTailRot[i];
+            }        
+            tailEndEffector.rotation = virtualEndEffectorRot;         
+ 
         }
         #endregion
 
@@ -104,8 +145,79 @@ namespace OctopusController
         //TODO: implement Gradient Descent method to move tail if necessary
         private void updateTail()
         {
+            if(startedMovement)
+            {
+                Quaternion[] temporalTailRot = new Quaternion[_tail.Bones.Length];
 
+                Quaternion temporalEndEffectorRot;
+
+
+                for (int i = 0; i < _tail.Bones.Length; i++)
+                {
+                    for (int j = 0; j < _tail.Bones.Length; j++)
+                    {
+                        temporalTailRot[j] = virtualTailRot[j];
+                    }
+                    temporalEndEffectorRot = virtualEndEffectorRot;
+
+
+                    float leftDist = checkFuturePos(i, 1);
+
+                    for (int j = 0; j < _tail.Bones.Length; j++)
+                    {
+                        virtualTailRot[j] = temporalTailRot[j];
+                    }
+                    virtualEndEffectorRot = temporalEndEffectorRot;
+
+                    float rightDist = checkFuturePos(i, -1);
+
+                    if (leftDist < rightDist)
+                    {
+                        for (int j = 0; j < _tail.Bones.Length; j++)
+                        {
+                            virtualTailRot[j] = temporalTailRot[j];
+                        }
+                        virtualEndEffectorRot = temporalEndEffectorRot;
+
+                        checkFuturePos(i, 1);
+                    }
+                }
+            }
         }
+
+        private float checkFuturePos(int i, int r = 1)
+        {
+            Vector3 vectorToTarget = tailTarget.position - virtualTailPos[i];
+
+            float angle = Vector3.Angle(virtualTailRot[i].eulerAngles, vectorToTarget);
+
+            Vector3 rotationAxis = Vector3.Cross(vectorToTarget, virtualTailRot[i].eulerAngles);
+
+            float finalAngle = angle / (tailTarget.position - virtualEndEffectorPos).magnitude;
+
+            virtualTailRot[i].SetAxisAngle(rotationAxis, finalAngle * r);
+
+            //simulateKinematics();
+
+            float newDist = (tailTarget.position - virtualEndEffectorPos).magnitude;
+
+            return newDist;
+        }
+
+        private void simulateKinematics()
+        {
+            Quaternion rotations = virtualTailRot[0];
+
+            for (int i = 1; i < virtualTailPos.Length; i++)
+            {
+                virtualTailPos[i] = virtualTailPos[i-1] + rotations * virtualTailPos[i];
+
+                rotations *= virtualTailRot[i];
+            }
+
+            virtualEndEffectorPos = virtualTailPos[virtualTailPos.Length-1] + rotations * virtualEndEffectorPos;
+        }
+
         //TODO: implement fabrik method to move legs 
         private void updateLegs()
         {
