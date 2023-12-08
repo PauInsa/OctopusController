@@ -95,17 +95,14 @@ namespace OctopusController
         public void UpdateIK()
         {
 
-
+            
             updateTail();
 
 
             for (int i = 0; i < _tail.Bones.Length; i++)
             {
-                _tail.Bones[i].position = virtualTailPos[i];
                 _tail.Bones[i].rotation = virtualTailRot[i];
-            }
-
-            tailEndEffector.position = virtualEndEffectorPos;         
+            }        
             tailEndEffector.rotation = virtualEndEffectorRot;         
  
         }
@@ -125,22 +122,17 @@ namespace OctopusController
         {
             if(startedMovement)
             {
-                Vector3[] temporalTailPos = new Vector3[_tail.Bones.Length];
                 Quaternion[] temporalTailRot = new Quaternion[_tail.Bones.Length];
 
-                Vector3 temporalEndEffectorPos = new Vector3();
-                Quaternion temporalEndEffectorRot = new Quaternion();
+                Quaternion temporalEndEffectorRot;
 
 
                 for (int i = 0; i < _tail.Bones.Length; i++)
                 {
                     for (int j = 0; j < _tail.Bones.Length; j++)
                     {
-                        temporalTailPos[j] = virtualTailPos[j];
                         temporalTailRot[j] = virtualTailRot[j];
                     }
-
-                    temporalEndEffectorPos = virtualEndEffectorPos;
                     temporalEndEffectorRot = virtualEndEffectorRot;
 
 
@@ -148,11 +140,8 @@ namespace OctopusController
 
                     for (int j = 0; j < _tail.Bones.Length; j++)
                     {
-                        virtualTailPos[j] = temporalTailPos[j];
                         virtualTailRot[j] = temporalTailRot[j];
                     }
-
-                    virtualEndEffectorPos = temporalEndEffectorPos;
                     virtualEndEffectorRot = temporalEndEffectorRot;
 
                     float rightDist = checkFuturePos(i, -1);
@@ -161,11 +150,8 @@ namespace OctopusController
                     {
                         for (int j = 0; j < _tail.Bones.Length; j++)
                         {
-                            virtualTailPos[j] = temporalTailPos[j];
                             virtualTailRot[j] = temporalTailRot[j];
                         }
-
-                        virtualEndEffectorPos = temporalEndEffectorPos;
                         virtualEndEffectorRot = temporalEndEffectorRot;
 
                         checkFuturePos(i, 1);
@@ -174,22 +160,21 @@ namespace OctopusController
             }
         }
 
-        private float checkFuturePos(int i, int r)
+        private float checkFuturePos(int i, int r = 1)
         {
+            Vector3 vectorToTarget = tailTarget.position - virtualTailPos[i];
 
-            Vector3 vectorToTarget = virtualTailPos[i] - _tail.Bones[i].position;
-
-            float angle = Vector3.Angle(vectorToTarget, virtualTailRot[i].eulerAngles);
+            float angle = Vector3.Angle(virtualTailRot[i].eulerAngles, vectorToTarget);
 
             Vector3 rotationAxis = Vector3.Cross(vectorToTarget, virtualTailRot[i].eulerAngles);
 
-            float finalAngle = angle / (virtualEndEffectorPos - tailTarget.position).magnitude;
+            float finalAngle = angle / (tailTarget.position - virtualEndEffectorPos).magnitude;
 
-            _tail.Bones[i].Rotate(rotationAxis, finalAngle * r, Space.World);
+            virtualTailRot[i].SetAxisAngle(rotationAxis, finalAngle * r);
 
-            simulateKinematics();
+            //simulateKinematics();
 
-            float newDist = (virtualEndEffectorPos - tailTarget.position).magnitude;
+            float newDist = (tailTarget.position - virtualEndEffectorPos).magnitude;
 
             return newDist;
         }
@@ -206,7 +191,6 @@ namespace OctopusController
             }
 
             virtualEndEffectorPos = virtualTailPos[virtualTailPos.Length-1] + rotations * virtualEndEffectorPos;
-
         }
 
         //TODO: implement fabrik method to move legs 
