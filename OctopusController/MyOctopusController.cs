@@ -23,6 +23,10 @@ namespace OctopusController
         float _twistMin, _twistMax;
         float _swingMin, _swingMax;
 
+        bool isBallShoot = false;
+        Transform[] allRegions;
+
+
         #region public methods
         //DO NOT CHANGE THE PUBLIC METHODS!!
 
@@ -57,6 +61,8 @@ namespace OctopusController
             _randomTargets = randomTargets;
             //TODO: use the regions however you need to make sure each tentacle stays in its region
 
+
+            
         }
 
               
@@ -69,13 +75,18 @@ namespace OctopusController
         public void NotifyShoot() {
             //TODO. what happens here?
             Debug.Log("Shoot");
+            isBallShoot = true;
         }
 
 
         public void UpdateTentacles()
         {
             //TODO: implement logic for the correct tentacle arm to stop the ball and implement CCD method
-            update_ccd();
+            for (int i = 0; i < _tentacles.Length; i++)
+            {
+                update_ccd(i);
+            }
+            
         }
 
 
@@ -86,21 +97,61 @@ namespace OctopusController
 
         #region private and internal methods
         //todo: add here anything that you need
+        void update_ccd(int i) 
+        {
+            if (!isBallShoot)
+            {
+                RandomTarget(i);
+            }
+            else
+            {
+                LockToTarget(i);
+            }
+        }   
 
-        void update_ccd() {
-           
 
+        void LockToTarget(int i)
+        {
+            if (CheckRegionIndex() != i)
+            {
+                //Debug.Log("ENTERING IF LOCK TO TARGET");
+                RandomTarget(i);
+                return;
+            }
+            //Debug.Log("ENTERING LOCK TO TARGET");
+            for (int j = _tentacles[i].Bones.Length - 2; j >= 0; j--)
+            {
+                Vector3 vectorToEffector = _tentacles[i].EndEffector.position - _tentacles[i].Bones[j].position;
+                Vector3 vectorToTarget = _target.position - _tentacles[i].Bones[j].position;
+
+                Vector3 rotationAxis = Vector3.Cross(vectorToEffector, vectorToTarget).normalized;
+
+                float angle = Vector3.Angle(vectorToEffector, vectorToTarget);
+
+                _tentacles[i].Bones[j].Rotate(rotationAxis, angle, Space.World);
+            }
         }
 
+        void RandomTarget(int i)
+        {
+            for (int j = _tentacles[i].Bones.Length - 2; j >= 0; j--)
+            {
+                Vector3 vectorToEffector = _tentacles[i].EndEffector.position - _tentacles[i].Bones[j].position;
+                Vector3 vectorToTarget = _randomTargets[i].position - _tentacles[i].Bones[j].position;
 
-        
+                Vector3 rotationAxis = Vector3.Cross(vectorToEffector, vectorToTarget).normalized;
+
+                float angle = Vector3.Angle(vectorToEffector, vectorToTarget);
+
+                _tentacles[i].Bones[j].Rotate(rotationAxis, angle, Space.World);
+            }
+        }
+
+        int CheckRegionIndex()
+        {
+            return _currentRegion.GetSiblingIndex()-1;
+        }
 
         #endregion
-
-
-
-
-
-
     }
 }
