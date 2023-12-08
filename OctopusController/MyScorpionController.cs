@@ -61,7 +61,7 @@ namespace OctopusController
 
             //TODO: Initialize anything needed for the Gradient Descent implementation
             
-            tailEndEffector = _tail.getEndEffector();
+            tailEndEffector = _tail.EndEffector;
 
 
             virtualTailPos = new Vector3[_tail.Bones.Length];

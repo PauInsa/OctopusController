@@ -11,7 +11,7 @@ using UnityEngine;
 namespace OctopusController
 {
 
-    
+
     internal class MyTentacleController
 
     //MAINTAIN THIS CLASS AS INTERNAL
@@ -26,12 +26,9 @@ namespace OctopusController
         public float LegTotalDistance { get => _legTotalDistance; }
         public float[] LegDistances { get => _legDistances; }
 
-        List<Transform> tempList;
+        public Transform EndEffector { get => _endEffectorSphere; }
 
-        public Transform getEndEffector()
-        {
-            return _endEffectorSphere;
-        }
+        List<Transform> tempList;
 
         //Exercise 1.
         public Transform[] LoadTentacleJoints(Transform root, TentacleMode mode)
@@ -42,7 +39,8 @@ namespace OctopusController
             //you may want to use a list, and then convert it to an array and save it into _bones
             tentacleMode = mode;
 
-            switch (tentacleMode){
+            switch (tentacleMode)
+            {
                 case TentacleMode.LEG:
                     //TODO: in _endEffectorsphere you keep a reference to the base of the leg
 
@@ -50,26 +48,26 @@ namespace OctopusController
 
                     tempList.Add(node);
 
-                    for(int i = 1; i < 3; i++)
+                    for (int i = 1; i < 4; i++)
                     {
                         node = node.GetChild(1);
                         tempList.Add(node);
                     }
 
                     // Distance between joints and total distance
-                    for (int i = 0; i < tempList.Count-1; i++)
+                    for (int i = 0; i < tempList.Count - 1; i++)
                     {
-                        _legDistances[i] = (tempList[i].position - tempList[i+1].position).magnitude;
+                        _legDistances[i] = (tempList[i].position - tempList[i + 1].position).magnitude;
                         _legTotalDistance += LegDistances[i];
                     }
 
                     _bones = tempList.ToArray();
-                    
-                    _endEffectorSphere = node.GetChild(1);
+
+                    _endEffectorSphere = node;
                     break;
                 case TentacleMode.TAIL:
                     //TODO: in _endEffectorsphere you keep a reference to the red sphere
-                    
+
                     Transform node1 = root;
 
                     tempList.Add(node1); // Joint 0
@@ -86,7 +84,7 @@ namespace OctopusController
                     break;
                 case TentacleMode.TENTACLE:
                     //TODO: in _endEffectorphere you  keep a reference to the sphere with a collider attached to the endEffector
-                    
+
                     // 49 Iteracions per arribar a Bone.001
                     // 50 Iteracions per arribar a Bone.001_end
                     // 51 Iteracions per arribar a BallRegion
