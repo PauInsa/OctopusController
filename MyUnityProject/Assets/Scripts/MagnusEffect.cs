@@ -82,19 +82,41 @@ public class MagnusEffect : MonoBehaviour
 
             newPos.x = ball.position.x;
             newPos.z = ball.position.z - forceSlider.value/20 * proportion;
-            newPos.y = ball.position.y + forceSlider.value / 70 * proportion - gravity * Mathf.Pow(proportion,2);
+            newPos.y = ball.position.y + forceSlider.value/70 * proportion - gravity * Mathf.Pow(proportion,2);
 
 
             predictedSpheres[i].position = newPos;
         }
 
-        for(int i = 0;i < shotSpheres.Count;i++)
+
+        //Magnus effect formula: F=p*v*w*A
+        //F = lift force,
+        //p = air density,
+        //v = velocity of the object,
+        //A = cross-sectional area of the object
+
+
+        for (int i = 0;i < shotSpheres.Count;i++)
         {
             Vector3 newPos;
 
-            float proportion = (((float)i + 1.0f) / (float)predictedSpheres.Count) * 2;
+            //Densitat de l'aire 1.2Kg/m^3
+            float p = 1.2f;
 
-            newPos.x = predictedSpheres[i].position.x;
+            //Slider de forca
+            float v = forceSlider.value;
+
+            //Slider de l'effecte
+            float w = effectSlider.value;
+
+            //Diametre de la pilota.
+            float A = 0.001680421f*2;
+
+            float magnussForce = p*v*w*A;
+
+            float proportion = (((float)i + 1.0f) / (float)shotSpheres.Count) * 2;
+
+            newPos.x = predictedSpheres[i].position.x + (magnussForce/50) * proportion;
             newPos.z = predictedSpheres[i].position.z;
             newPos.y = predictedSpheres[i].position.y;
 
