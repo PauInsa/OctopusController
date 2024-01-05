@@ -25,6 +25,7 @@ namespace OctopusController
         float _swingMin, _swingMax;
 
         bool isBallShoot = false;
+        bool catchBall = false;
         Transform[] allRegions;
 
         float maxSwing = 100.0f;
@@ -81,6 +82,7 @@ namespace OctopusController
             //TODO. what happens here?
             Debug.Log("Shoot");
             isBallShoot = true;
+            catchBall = !catchBall;
         }
 
 
@@ -104,7 +106,7 @@ namespace OctopusController
         //todo: add here anything that you need
         void update_ccd(int i) 
         {
-            if (!isBallShoot)
+            if (!isBallShoot || catchBall)
             {
                 RandomTarget(i);
             }
@@ -131,7 +133,6 @@ namespace OctopusController
 
                 if (i == 0 || i == 3)
                 {
-                    Debug.Log(i);
                     targetOffset.z = 6.9f;
                 }
 
