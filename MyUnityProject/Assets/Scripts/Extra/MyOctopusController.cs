@@ -25,7 +25,7 @@ namespace OctopusController
         float _swingMin, _swingMax;
 
         bool isBallShoot = false;
-        bool catchBall = false;
+        public bool catchBall = false;
         Transform[] allRegions;
 
         float maxSwing = 100.0f;
