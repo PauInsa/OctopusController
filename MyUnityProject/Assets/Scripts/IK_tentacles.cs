@@ -8,6 +8,8 @@ using OctopusController;
 public class IK_tentacles : MonoBehaviour
 {
 
+    public MagnusEffect ball;
+
     [SerializeField]
     Transform[] _tentacles = new Transform[4];
 
@@ -55,6 +57,8 @@ public class IK_tentacles : MonoBehaviour
     public void NotifyShoot()
     {
         _myController.NotifyShoot();
+
+        ball.StartBallMovement(_myController.catchBall);
     }
 
 

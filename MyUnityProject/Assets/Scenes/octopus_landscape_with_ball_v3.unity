@@ -1489,6 +1489,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ca0aa0fc4b617145a675f50376d2723, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ball: {fileID: 436382070}
   _tentacles:
   - {fileID: 523450251}
   - {fileID: 362222624}
@@ -1553,6 +1554,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ca0aa0fc4b617145a675f50376d2723, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ball: {fileID: 0}
   _tentacles:
   - {fileID: 1297507992}
   - {fileID: 1069970266}
@@ -2076,6 +2078,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ball: {fileID: 1938829484}
+  target: {fileID: 1418656078}
   predictedSpheres:
   - {fileID: 913436998}
   - {fileID: 830492594}
@@ -2101,6 +2104,7 @@ MonoBehaviour:
   forceSlider: {fileID: 1725396510}
   effectSlider: {fileID: 1172727220}
   forceBarSpeed: 1
+  ballSpeed: 3
 --- !u!4 &436382071
 Transform:
   m_ObjectHideFlags: 0
@@ -6629,6 +6633,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ca0aa0fc4b617145a675f50376d2723, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ball: {fileID: 0}
   _tentacles:
   - {fileID: 1851449018}
   - {fileID: 344278854}
@@ -8690,7 +8695,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 70f145abed0b4ae48acf34cbafba0570, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -127.07
+      value: -124.341
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 70f145abed0b4ae48acf34cbafba0570, type: 3}
       propertyPath: m_LocalPosition.y
@@ -9361,6 +9366,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 865907604773395664, guid: c9ae8800298c5904a805978e2ff06201, type: 3}
+      propertyPath: m_TagString
+      value: Cua
+      objectReference: {fileID: 0}
     - target: {fileID: 962731551332921361, guid: c9ae8800298c5904a805978e2ff06201, type: 3}
       propertyPath: m_Name
       value: joint_3
@@ -9456,6 +9465,10 @@ PrefabInstance:
     - target: {fileID: 7769292345469004187, guid: c9ae8800298c5904a805978e2ff06201, type: 3}
       propertyPath: m_LocalPosition.z
       value: -1.39
+      objectReference: {fileID: 0}
+    - target: {fileID: 7926132714208926850, guid: c9ae8800298c5904a805978e2ff06201, type: 3}
+      propertyPath: m_TagString
+      value: Cua
       objectReference: {fileID: 0}
     - target: {fileID: 8005202564104028491, guid: c9ae8800298c5904a805978e2ff06201, type: 3}
       propertyPath: m_Name

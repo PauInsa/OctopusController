@@ -35,6 +35,7 @@ public class MovingBall : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        _myOctopus.NotifyShoot();
+        if(collision.gameObject.CompareTag("Cua"))
+            _myOctopus.NotifyShoot();
     }
 }
