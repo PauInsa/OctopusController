@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class MagnusEffect : MonoBehaviour
 {
     public Transform ball;
+    public Transform target;
     public List<Transform> predictedSpheres;
     public List<Transform> shotSpheres;
 
@@ -48,6 +49,7 @@ public class MagnusEffect : MonoBehaviour
 
         if(Input.GetKeyDown(KeyCode.Space))
         {
+            ball.position = initBallPos;
             startForceBarMovement = true;
             timeStartForceBar = Time.time;
         }
@@ -82,11 +84,12 @@ public class MagnusEffect : MonoBehaviour
 
         if(ballStarted)
             UpdateMoveBall();
-
-        updateParabola();
+        
+        if(startForceBarMovement)
+            UpdateParabola();
     }
 
-    void updateParabola()
+    void UpdateParabola()
     {
         for(int i = 0; i < predictedSpheres.Count; i++)
         {
@@ -94,9 +97,9 @@ public class MagnusEffect : MonoBehaviour
 
             float proportion = (((float)i + 1.0f) / (float)predictedSpheres.Count)*2;
 
-            newPos.x = ball.position.x;
-            newPos.z = ball.position.z - forceSlider.value/20 * proportion;
-            newPos.y = ball.position.y + forceSlider.value/70 * proportion - gravity * Mathf.Pow(proportion,2);
+            newPos.x = initBallPos.x;
+            newPos.z = initBallPos.z - forceSlider.value/20 * proportion;
+            newPos.y = initBallPos.y + forceSlider.value/70 * proportion - gravity * Mathf.Pow(proportion,2);
 
 
             predictedSpheres[i].position = newPos;
@@ -141,10 +144,8 @@ public class MagnusEffect : MonoBehaviour
 
     public void StartBallMovement(bool stop)
     {
-        ballStopped = stop;
+        ballStopped = !stop;
         ballStarted = true;
-
-        ball.position = initBallPos;
 
         timeStartBall = Time.time;
     }
@@ -152,7 +153,7 @@ public class MagnusEffect : MonoBehaviour
     private void UpdateMoveBall()
     {
 
-        float timer = (Time.time - timeStartForceBar) / ballSpeed;
+        float timer = ((Time.time - timeStartBall) / ballSpeed)*2;
 
         //Densitat de l'aire 1.2Kg/m^3
         float p = 1.2f;
@@ -170,17 +171,23 @@ public class MagnusEffect : MonoBehaviour
 
         Vector3 newPos= ball.position;
 
-        newPos.x = initBallPos.x + (magnussForce / 50) * timer;
-        newPos.z = initBallPos.y - forceSlider.value / 20 * timer;
-        newPos.y = initBallPos.z + forceSlider.value / 70 * timer - gravity * Mathf.Pow(timer, 2);
+        newPos.x = initBallPos.x + (magnussForce / 50f) * timer;
+        newPos.z = initBallPos.z - forceSlider.value / 20f * timer;
+        newPos.y = initBallPos.y + forceSlider.value / 70f * timer - gravity * Mathf.Pow(timer, 2);
 
         ball.position = newPos;
+
+        if(ballStopped)
+        {
+            newPos.z = -72f;
+            target.position = newPos;
+        }
 
 
         Debug.Log(initBallPos);
 
 
-        if(ball.position.z <= -70.1f && ballStopped)
+        if(ball.position.z <= -70.1f && ballStopped || (ball.position-initBallPos).magnitude >=100f)
         {
             ballStarted = false;
         }

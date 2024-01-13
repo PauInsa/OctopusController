@@ -119,7 +119,6 @@ public class MovingTarget: MonoBehaviour
         if(_mode == MovingMode.USERTARGET && transform.name == "BlueTarget" && collision.collider.transform.childCount != 0)
         {
             _myOctopus.NotifyTarget(transform, collision.collider.transform);
-
             
         }
             

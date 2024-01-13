@@ -2078,6 +2078,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ball: {fileID: 1938829484}
+  target: {fileID: 1418656078}
   predictedSpheres:
   - {fileID: 913436998}
   - {fileID: 830492594}
@@ -9365,6 +9366,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 865907604773395664, guid: c9ae8800298c5904a805978e2ff06201, type: 3}
+      propertyPath: m_TagString
+      value: Cua
+      objectReference: {fileID: 0}
     - target: {fileID: 962731551332921361, guid: c9ae8800298c5904a805978e2ff06201, type: 3}
       propertyPath: m_Name
       value: joint_3
@@ -9460,6 +9465,10 @@ PrefabInstance:
     - target: {fileID: 7769292345469004187, guid: c9ae8800298c5904a805978e2ff06201, type: 3}
       propertyPath: m_LocalPosition.z
       value: -1.39
+      objectReference: {fileID: 0}
+    - target: {fileID: 7926132714208926850, guid: c9ae8800298c5904a805978e2ff06201, type: 3}
+      propertyPath: m_TagString
+      value: Cua
       objectReference: {fileID: 0}
     - target: {fileID: 8005202564104028491, guid: c9ae8800298c5904a805978e2ff06201, type: 3}
       propertyPath: m_Name

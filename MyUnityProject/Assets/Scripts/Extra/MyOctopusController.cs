@@ -32,6 +32,8 @@ namespace OctopusController
         float maxTwist = 180.0f;
         float magicNumber = 110.0f;
 
+        Vector3 targetOffset = new Vector3(0.0f, 0.0f, 0.0f);
+
 
         #region public methods
         //DO NOT CHANGE THE PUBLIC METHODS!!
@@ -125,7 +127,7 @@ namespace OctopusController
                 return;
             }
 
-            Vector3 targetOffset = new Vector3(0.0f, 0.0f, 0.0f);
+
 
             for (int j = _tentacles[i].Bones.Length - 2; j >= 0; j--)
             {
@@ -157,8 +159,15 @@ namespace OctopusController
         {
             for (int j = _tentacles[i].Bones.Length - 2; j >= 0; j--)
             {
+                targetOffset.z = 0.0f;
+
+                if (i == 0 || i == 3)
+                {
+                    targetOffset.z = 6.9f;
+                }
+
                 Vector3 vectorToEffector = _tentacles[i].EndEffector.position - _tentacles[i].Bones[j].position;
-                Vector3 vectorToTarget = _randomTargets[i].position - _tentacles[i].Bones[j].position;
+                Vector3 vectorToTarget = (_randomTargets[i].position+targetOffset) - _tentacles[i].Bones[j].position;
 
                 Vector3 rotationAxis = Vector3.Cross(vectorToEffector, vectorToTarget).normalized;
 
